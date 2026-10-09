@@ -49,9 +49,9 @@ app.use(mongoSanitize());
 
 const store = MongoStore.create({
     mongoUrl: dbUrl,
-    touchAfter: 24 * 60 * 60, 
+    touchAfter: 24 * 60 * 60,
     crypto: {
-        secret: 'thisshouldbeabettersecret!'
+        secret: process.env.SESSION_SECRET || 'thisshouldbeabettersecret!'
     }
 });
 
@@ -62,7 +62,7 @@ store.on("error", function(e){
 const sessionConfig = {
     store,
     name: 'session', //sets a name for your cookie session
-    secret: 'thishouldbeabettersecret',
+    secret: process.env.SESSION_SECRET || 'thishouldbeabettersecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
@@ -164,6 +164,10 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render('error', { err }); 
 })
 
-app.listen(3000, () => {
-    console.log('Serving on port 3000')
-})
+if (!process.env.VERCEL) {
+    app.listen(3000, () => {
+        console.log('Serving on port 3000')
+    })
+}
+
+module.exports = app;
